@@ -4,9 +4,11 @@ Aplicación web para previsualizar y convertir archivos de Adobe Photoshop e Ill
 """
 import streamlit as st
 from io import BytesIO
+import time
 import config
 from utils.file_validator import validate_uploaded_file, get_file_type, sanitize_filename
 from utils.cache_manager import force_garbage_collection
+from utils.analytics import initialize_analytics, track_file_upload, track_file_processed, track_download, track_error, track_file_size_exceeded
 from processors.psd_processor import process_psd_for_preview, process_psd_for_download
 from processors.ai_processor import process_ai_for_preview, process_ai_for_download
 from processors.image_utils import format_file_size
@@ -22,6 +24,9 @@ st.set_page_config(
         'About': "Convertí archivos PSD de Photoshop y AI de Illustrator a PNG/JPG sin instalar Adobe. Gratis, online, hasta 100MB."
     }
 )
+
+# Inicializar Analytics (Google Analytics 4 + Hotjar)
+initialize_analytics()
 
 # Meta tags SEO
 st.markdown("""
@@ -661,12 +666,22 @@ def main():
     is_valid, error_msg = validate_uploaded_file(uploaded_file)
 
     if not is_valid:
+        # Trackear error de validación
+        file_size_mb = uploaded_file.size / (1024 * 1024)
+        if file_size_mb > config.MAX_FILE_SIZE_MB:
+            track_file_size_exceeded(file_size_mb, config.MAX_FILE_SIZE_MB)
+        else:
+            track_error('validation_error', error_msg)
         st.error(f"❌ {error_msg}")
         return
 
     # Información del archivo con diseño mejorado
     file_type = get_file_type(uploaded_file.name)
     file_size_str = format_file_size(uploaded_file.size)
+    file_size_mb = uploaded_file.size / (1024 * 1024)
+
+    # Trackear upload exitoso
+    track_file_upload(file_type, file_size_mb)
 
     st.markdown("---")
     st.success("✓ Archivo cargado correctamente")
@@ -711,6 +726,9 @@ def main():
             file_bytes = uploaded_file.read()
             uploaded_file.seek(0)  # Volver al inicio para procesamiento
 
+            # Medir tiempo de procesamiento
+            start_time = time.time()
+
             # Procesar según tipo de archivo
             if file_type == 'psd':
                 preview_img, original_size = process_psd_for_preview(uploaded_file)
@@ -719,6 +737,10 @@ def main():
             else:
                 st.error("Tipo de archivo no soportado")
                 return
+
+            # Calcular tiempo de procesamiento y trackear
+            processing_time = time.time() - start_time
+            track_file_processed(file_type, file_size_mb, processing_time)
 
             # Mostrar información de dimensiones con cuarto card
             st.markdown(f"""
@@ -748,6 +770,7 @@ def main():
             force_garbage_collection()
 
     except MemoryError:
+        track_error('memory_error', f'File too large: {file_size_mb:.2f}MB', file_type)
         st.error(
             f"⚠️ Archivo muy pesado para procesar. "
             f"Límite: {config.MAX_FILE_SIZE_MB}MB. "
@@ -756,6 +779,7 @@ def main():
         return
 
     except Exception as e:
+        track_error('processing_error', str(e), file_type)
         st.error(f"❌ Error procesando archivo: {str(e)}")
         return
 
@@ -789,6 +813,9 @@ def main():
                     # Preparar nombre de descarga
                     original_name = sanitize_filename(st.session_state['file_name'])
                     download_name = original_name.rsplit('.', 1)[0] + '.png'
+
+                    # Trackear descarga PNG
+                    track_download('PNG', st.session_state['file_type'], file_size_mb)
 
                     # Botón de descarga
                     st.download_button(
@@ -831,6 +858,9 @@ def main():
                     # Preparar nombre de descarga
                     original_name = sanitize_filename(st.session_state['file_name'])
                     download_name = original_name.rsplit('.', 1)[0] + '.jpg'
+
+                    # Trackear descarga JPG
+                    track_download('JPG', st.session_state['file_type'], file_size_mb)
 
                     # Botón de descarga
                     st.download_button(
