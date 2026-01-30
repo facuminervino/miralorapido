@@ -12,7 +12,7 @@ Google Analytics 4 + Hotjar
 # 3. Copia el Measurement ID (formato: G-XXXXXXXXXX)
 # 4. Reemplaza el valor abajo
 
-GA4_MEASUREMENT_ID = "G-XXXXXXXXXX"  # Reemplazar con tu ID real
+GA4_MEASUREMENT_ID = "G-9NWVH8V2NY"  # Google Analytics 4 Measurement ID
 
 
 # ============================================
@@ -25,7 +25,7 @@ GA4_MEASUREMENT_ID = "G-XXXXXXXXXX"  # Reemplazar con tu ID real
 # 4. Copia el Site ID (número, ej: 1234567)
 # 5. Reemplaza el valor abajo
 
-HOTJAR_SITE_ID = "0000000"  # Reemplazar con tu Site ID real
+HOTJAR_SITE_ID = "8c89e971423b2"  # Hotjar/Contentsquare Site ID
 
 
 # ============================================

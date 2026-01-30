@@ -33,24 +33,16 @@ def inject_google_analytics():
 
 def inject_hotjar():
     """
-    Inyecta el código de Hotjar para heatmaps y grabaciones
+    Inyecta el código de Hotjar/Contentsquare para heatmaps y grabaciones
     """
     hotjar_id = analytics_config.HOTJAR_SITE_ID
 
     # Solo inyectar si hay un ID válido configurado
     if hotjar_id and hotjar_id != "0000000":
+        # Nuevo formato: Hotjar usa Contentsquare
         hotjar_code = f"""
-        <!-- Hotjar Tracking Code -->
-        <script>
-            (function(h,o,t,j,a,r){{
-                h.hj=h.hj||function(){{(h.hj.q=h.hj.q||[]).push(arguments)}};
-                h._hjSettings={{hjid:{hotjar_id},hjsv:6}};
-                a=o.getElementsByTagName('head')[0];
-                r=o.createElement('script');r.async=1;
-                r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-                a.appendChild(r);
-            }})(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-        </script>
+        <!-- Hotjar/Contentsquare Tracking Code -->
+        <script src="https://t.contentsquare.net/uxa/{hotjar_id}.js"></script>
         """
         st.markdown(hotjar_code, unsafe_allow_html=True)
 
