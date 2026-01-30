@@ -1,0 +1,11 @@
+[server]
+maxUploadSize = 100
+enableCORS = false
+maxMessageSize = 200
+
+[browser]
+gatherUsageStats = false
+
+[runner]
+# Optimización para archivos grandes
+fastReruns = false

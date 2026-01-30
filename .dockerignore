@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Testing
+.pytest_cache/
+tests/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.psd
+*.ai
+*.png
+*.jpg
+*.jpeg
+
+# Documentation
+README.md
